@@ -7,6 +7,10 @@ const bodyParser = require('body-parser');
 // to allow request from my Angular test client that use another port
 const cors = require('cors');
 
+const mongoose = require('mongoose');
+const connection = mongoose.connection;
+
+
 app.set('port', (process.env.port || 3000));
 
 app.use(bodyParser.json());
@@ -25,7 +29,17 @@ app.use(function (req, res) {
 	res.json(err);
 });
 
-app.listen(app.get('port'), function () {
-	console.log(`Express server listening on port ${app.get('port')}`);// eslint-disable-line no-console
+// useNewUrlParser to avoid de deprecation warning
+mongoose.connect('mongodb://localhost:27017/whiskycms', { useNewUrlParser: true });
+
+connection.on('error', (err) => {
+	console.error(`connection to MongoDB error: ${err.message}`); // eslint-disable-line no-console
 });
 
+connection.once('open', () => {
+	console.log('Connected to MongoDB'); // eslint-disable-line no-console
+
+	app.listen(app.get('port'), () => {
+		console.log(`Express server listening on port ${app.get('port')}`);// eslint-disable-line no-console
+	});
+});
