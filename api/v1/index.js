@@ -17,6 +17,16 @@ router.get('/blog-posts', (req, res) => {
 		}));
 });
 
+router.get('/blog-posts/:id', (req, res) => {
+	const id = req.params.id;
+	Blogpost.findById(id)
+		.then(blogPost => res.status(200).json(blogPost))
+		.catch(err => res.status(500).json({
+			message: `blog post with id ${id} not found`,
+			error: err
+		}));
+});
+
 router.post('/blog-posts', (req, res) => {
 	console.log('req.body', req.body);
 	const blogPost = new Blogpost(req.body);
