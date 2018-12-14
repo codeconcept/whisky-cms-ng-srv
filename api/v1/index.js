@@ -33,7 +33,8 @@ router.get('/blog-posts/:id', (req, res) => {
 
 router.post('/blog-posts', (req, res) => {
 	console.log('req.body', req.body);
-	const blogPost = new Blogpost(req.body);
+	console.log('lastUploadedImageName', lastUploadedImageName);
+	const blogPost = new Blogpost({...req.body, image: lastUploadedImageName});
 	blogPost.save((err, blogPost) => {
 		if (err) {
 			return res.status(500).json(err);
@@ -75,13 +76,15 @@ router.delete('/blog-posts', (req, res) => {
 	});
 });
 
+let lastUploadedImageName = '';
 // file upload configuration
 const storage = multer.diskStorage({
 	destination: './uploads/',
 	filename: function (req, file, callback) {
 		crypto.pseudoRandomBytes(16, function(err, raw) {
 			if (err) return callback(err);
-			callback(null, raw.toString('hex') + path.extname(file.originalname));
+			lastUploadedImageName = raw.toString('hex') + path.extname(file.originalname);
+			callback(null, lastUploadedImageName);
 		});
 	}
 });
@@ -89,12 +92,18 @@ const storage = multer.diskStorage({
 var upload = multer({storage: storage});
 
 // file upload route
-router.post('/blog-posts/images', upload.single('blogimage'), (req, res) => {
+router.post('/blog-posts/images', upload.single('image'), (req, res) => {
 	// console.log('req.file', req.file);
 	if (!req.file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
 		return res.status(400).json({ msg: 'only image files please'});
 	}
 	res.status(201).send({ fileName: req.file.filename, file: req.file });
+});
+
+
+router.get('/images/:image', (req, res) => {
+	const image = req.params.image;
+	res.sendFile(path.join(__dirname, `./uploads/${image}`));
 });
 
 module.exports = router;

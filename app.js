@@ -18,6 +18,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(cors());
 
+const uploadsDir = require('path').join(__dirname,'/uploads');
+console.log('uploadsDir', uploadsDir);
+app.use(express.static(uploadsDir));
+
 app.use('/api/v1', api);
 app.use(express.static('static'));
 
