@@ -106,4 +106,19 @@ router.get('/images/:image', (req, res) => {
 	res.sendFile(path.join(__dirname, `./uploads/${image}`));
 });
 
+router.put('/blog-posts/:id', upload.single('image'), (req, res) => {
+	const id = req.params.id;
+	const conditions = { _id: id};
+	const blogPost = {...req.body, image: lastUploadedImageName};
+	const update = { $set: blogPost };
+	const options = {
+		upsert: true,
+		new: true
+	};
+	Blogpost.findOneAndUpdate(conditions, update, options, (err, response) => {
+		if(err) return res.status(500).json({ msg: 'update failed', error: err });
+		res.status(200).json({ msg: `document with id ${id} updated`, response: response });
+	});
+});
+
 module.exports = router;
