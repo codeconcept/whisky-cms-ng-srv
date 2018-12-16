@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const Blogpost = require('../models/blogpost');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const crypto = require('crypto');
 const path = require('path');
+
+const Blogpost = require('../models/blogpost');
+const resize = require('../../utils/resize');
 
 router.get('/ping', (req, res) => {
 	res.status(200).json({ msg: 'pong', date: new Date()});
@@ -34,7 +36,18 @@ router.get('/blog-posts/:id', (req, res) => {
 router.post('/blog-posts', (req, res) => {
 	console.log('req.body', req.body);
 	console.log('lastUploadedImageName', lastUploadedImageName);
-	const blogPost = new Blogpost({...req.body, image: lastUploadedImageName});
+	const smallImagePath = `./uploads/${lastUploadedImageName}`;
+	const outputName = `./uploads/small-${lastUploadedImageName}`;
+	resize({path: smallImagePath, width: 200, height: 200, outputName: outputName })
+		.then(data => {
+			console.log('OK resize', data.size);
+		})
+		.catch(err => console.error('err from resize', err));
+	const blogPost = new Blogpost({
+		...req.body, 
+		image: lastUploadedImageName,
+		smallImage: `small-${lastUploadedImageName}`
+	});
 	blogPost.save((err, blogPost) => {
 		if (err) {
 			return res.status(500).json(err);
