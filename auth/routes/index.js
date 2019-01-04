@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const passport = require('passport');
 
 router.post('/register', (req, res) => {
 	console.log('user from req.body >>>', req.body);
@@ -17,6 +18,19 @@ router.post('/register', (req, res) => {
 		});
 		res.status(201).json(user);
 	});
+});
+
+router.post('/login', passport.authenticate('local', {
+	successRedirect: '/auth/success',
+	failureRedirect: '/auth/failure'
+}));
+
+router.get('/success', (req, res) => {
+	res.status(200).json({ msg: 'logged in', user: req.user });
+});
+
+router.get('/failure', (req, res) => {
+	res.status(200).json({ msg: 'NOT logged in' });
 });
 
 module.exports = router;
