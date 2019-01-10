@@ -5,8 +5,6 @@ const multer = require('multer');
 const crypto = require('crypto');
 const path = require('path');
 
-const passport = require('passport');
-
 const Blogpost = require('../models/blogpost');
 const resize = require('../../utils/resize');
 
@@ -60,8 +58,13 @@ router.post('/blog-posts', (req, res) => {
 	});
 });
 
-router.delete('/blog-posts/:id', passport.authenticate('local', { failureRedirect: '/auth/failure' }), (req, res) => {
-	console.log('req >>>', req);
+router.delete('/blog-posts/:id', (req, res) => {
+	// return res.status(500).json({ msg: `TESTING ERROR HANDLING on ${req.params.id} delete`});
+	console.log('req.isAuthenticated()', req.isAuthenticated());
+	if(!req.isAuthenticated()) {
+		return res.status(401).json({ result: 'KO', msg: 'NOT authorized to delete a blog post' });
+	}
+	console.log('router.delete / req.user >>>', req.user);
 	const id = req.params.id;
 	console.log('delete by id', id);
 	Blogpost.findByIdAndDelete(id, (err, blogPost) => {
