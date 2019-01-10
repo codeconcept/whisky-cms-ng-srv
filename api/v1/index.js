@@ -5,6 +5,8 @@ const multer = require('multer');
 const crypto = require('crypto');
 const path = require('path');
 
+const passport = require('passport');
+
 const Blogpost = require('../models/blogpost');
 const resize = require('../../utils/resize');
 
@@ -58,7 +60,8 @@ router.post('/blog-posts', (req, res) => {
 	});
 });
 
-router.delete('/blog-posts/:id', (req, res) => {
+router.delete('/blog-posts/:id', passport.authenticate('local', { failureRedirect: '/auth/failure' }), (req, res) => {
+	console.log('req >>>', req);
 	const id = req.params.id;
 	console.log('delete by id', id);
 	Blogpost.findByIdAndDelete(id, (err, blogPost) => {

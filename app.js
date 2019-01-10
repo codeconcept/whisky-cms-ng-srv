@@ -21,7 +21,8 @@ app.use(cookieParser());
 app.use(session({
 	resave: true,
 	saveUninitialized: true,
-	secret: 'my super secret'
+	secret: 'my super secret',
+	name: 'wisky-cookie'
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -64,7 +65,7 @@ app.set('port', (process.env.port || 3000));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(cors());
+app.use(cors({credentials: true, origin: 'http://localhost:4200'}));
 
 const uploadsDir = require('path').join(__dirname,'/uploads');
 console.log('uploadsDir', uploadsDir);
